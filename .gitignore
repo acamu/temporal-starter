@@ -39,3 +39,7 @@ nltk*
 unbiased*
 
 openai-load-balancer-main
+
+
+# lock
+poetry.lock
