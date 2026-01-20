@@ -2,7 +2,7 @@
 name = "temporal-starter"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Arnaud Camuset <arnaud.Camuset@free.fr>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
