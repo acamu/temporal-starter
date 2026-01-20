@@ -57,7 +57,7 @@ async def main():
     # Start the workflows
     # ULID = temps + random, lexicographiquement orderable
     workflow_id = f"order-workflow-{ulid.ulid()}"
-    result = await client.execute_workflow(
+    handle = await client.start_workflow(
         "GenAIWorkflow",
         f"{client_request} {workflow_id}",
         id=workflow_id,
@@ -67,6 +67,15 @@ async def main():
         # run_timeout=timedelta(seconds=2),
         # task_timeout=timedelta(seconds=2),
     )
+
+    logger.success(f"Workflow, starting...(ID: {workflow_id})")
+
+    # get Workflow ID
+    workflow_handle = client.get_workflow_handle(workflow_id)
+
+    # ....
+
+    result = await workflow_handle.result()
     logger.success(f"Workflow result : {result}")
 
 
