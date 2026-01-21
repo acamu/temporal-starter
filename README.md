@@ -80,6 +80,98 @@ This layout follows Python best practices for Temporal projects, ensuring scalab
 └── README.md
 ```
 
+Workflows  
+
+With Front End (Not part now of this example)
+
+```mermaid
+sequenceDiagram
+    participant UI as Angular Frontend
+    participant API as FastAPI Gateway
+    participant T as Temporal Server
+    participant W as Workflow (Worker)
+    participant A as Activities (LLM/Email)
+
+    Note over UI, API: Phase d'Initialisation
+    UI->>API: POST /workflow/start (brouillon)
+    API->>T: Start Workflow (ProfessionalEmailWorkflow)
+    T-->>API: workflow_id
+    API-->>UI: workflow_id
+
+    Note over UI, W: Boucle de Feedback (Polling)
+    loop Jusqu'à Complétion
+        UI->>API: GET /workflow/state/{id}
+        API->>T: Query: get_state + Describe
+        T-->>API: { status: RUNNING, is_thinking: true/false, proposal: "..." }
+        API-->>UI: Full State JSON
+    end
+
+    Note over W, A: Phase d'exécution IA
+    W->>A: execute_activity: call_external_api (LLM)
+    activate A
+    A-->>W: Résultat réécrit
+    deactivate A
+
+    Note over UI, W: Interaction Humaine
+    UI->>API: POST /workflow/signal/{id} (Valider ou Modifier)
+    API->>T: Signal: submit_email_content OU approve_llm_result
+    T->>W: Réveil du workflow (Update state)
+
+    Note over W, A: Phase Finale
+    W->>A: execute_activity: send_email
+    A-->>W: Succès
+    W-->>T: Completed
+
+```
+  
+Worker and workflow example
+```mermaid
+sequenceDiagram
+    participant TS as Temporal Server (Persistence)
+    participant W as Workflow Definition
+    participant WR as Worker (Executor)
+    participant A as Activities (LLM / Email)
+
+    Note over TS, WR: Le Worker écoute la Task Queue
+    
+    TS->>WR: Workflow Task (Start)
+    WR->>W: Initialise l'état (_is_thinking=False)
+    
+    W->>TS: Wait Condition (Attente _content)
+    Note right of TS: Le Workflow est suspendu (0 CPU)
+
+    TS->>WR: Signal: submit_email_content
+    WR->>W: Mise à jour _content
+    
+    loop Tant que pas approuvé (_is_approved == False)
+        W->>W: Set _is_thinking = True
+        W->>TS: Schedule Activity: call_external_api
+        TS->>WR: Activity Task
+        WR->>A: Execute: call_external_api
+        A-->>WR: Résultat (Texte réécrit)
+        WR-->>TS: Activity Task Completed
+        
+        TS->>WR: Workflow Task (Resume)
+        WR->>W: Update _proposal & _is_thinking = False
+        
+        W->>TS: Wait Condition (Signal Approval ou New Content)
+        Note right of TS: Le Workflow "dort" en attendant l'humain
+        
+        TS->>WR: Signal: approve_llm_result(True)
+        WR->>W: Set _is_approved = True
+    end
+
+    W->>TS: Schedule Activity: send_email
+    TS->>WR: Activity Task
+    WR->>A: Execute: send_email
+    A-->>WR: Success
+    WR-->>TS: Activity Task Completed
+    
+    W->>TS: Workflow Completed
+    Note over TS: Fin de l'historique
+
+```
+
 ## Prerequisites & Setup
 
 
