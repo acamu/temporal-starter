@@ -1,6 +1,6 @@
 # Temporal.io x LLM: Enterprise-Ready AI Orchestration
 
-This project demonstrates how to build resilient, production-grade AI workflows using **Temporal.io** and **Google Gemini for exemple**. It focuses on overcoming common distributed systems challenges: API instability, long-running processes, and seamless code versioning.
+This project demonstrates how to build resilient, production-grade AI workflows using **Temporal.io** and **fake LLM for exemple**. It focuses on overcoming common distributed systems challenges: API instability, long-running processes, and seamless code versioning.
 
 ## Key Features
 - **Durable Execution**: Workflows resume automatically after server or network failures.
