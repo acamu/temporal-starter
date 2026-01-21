@@ -124,16 +124,33 @@ graph TD
 ## Prerequisites & Setup
 
 
+### Available Variables
+
+| Alias |      Python Field      |    Default     | Description |       |
+|-------|:----------------------:|:--------------:|:-----------:|--:    |
+|   CUSTOM_LOGGING    |    activate_logging    |     false      |      workflow logging       |       |
+|   APP_VERSION    |      app_version       |      dev       |   Current application version          |       |
+|   LLM_CALL_URL    |      llm_call_url      |   http://...   |   Endpoint for the LLM API          |       |
+|   LLM_CALL_TIMEOUT    |    llm_call_timeout    |      180       |    Timeout in seconds for API calls         |       |
+|   TEMPORAL_SERVER_URL    |  temporal_server_url   | localhost:7233 |  Temporal cluster address           |       |
+|   TEMPORAL_SERVER_BEARER    | temporal_server_bearer |     ******     |   Bearer token for authentication          |       |
+|   TEMPORAL_SERVER_TLS    |  temporal_server_tls   |     False      |   Enable/Disable TLS encryption          |       |
+
 ### Self-Hosted Temporal Server
-reference page : temporal python dev_environnement
 
+### Download the cli and add it to you PATH
 
-Download the cli and add it to you PATH
-## Temporal server
+#### Running the Application
 
-``` 
-temporal server start-dev
-```
+To run this project, you need to open *three* separate terminals:
+1. Start the Temporal Server
+
+This launches the local development server with the Web UI.
+Bash
+
+    temporal server start-dev
+
+    Web UI: http://localhost:8233
 
 Once your server is running, visit the Temporal Web UI at http://localhost:8233. You can inspect:
 
@@ -141,11 +158,48 @@ Once your server is running, visit the Temporal Web UI at http://localhost:8233.
 - Real-time retries of failing Gemini calls.
 - Input/Output data for every step.
 
+2. Start the Worker
 
-## Testing
+The Worker listens for tasks and executes the Activities and Workflows.
+Bash
 
-This project uses `pytest` and `pytest-asyncio` along with Temporal's testing SDK.
+    python src/worker_simple/main_simple_worker.py
 
-```bash
-# Run all tests
-pytest
+3. Execute the Workflow
+
+This script triggers a workflow execution from the client side.
+Bash
+
+    python src/main_simple_workflow.py
+
+### Deployment & Versioning (Patching)
+
+This project demonstrates Zero-Downtime Deployment using Temporal's patching system.
+How it works:
+
+When updating the database logic from v1 to v2, we use workflow.patched("v3").
+
+    Existing Workflows: Continue using the old logic (get_database_data) to ensure deterministic replay.
+
+    New Workflows: Automatically follow the new logic (get_database_data_v2).
+
+Removing Patches:
+
+Once all old workflows are completed, you can safely "deprecate" the patch to clean up the code:
+Python
+
+    workflow.deprecate_patch("v3")
+    # You can now remove the 'else' branch safely
+
+### Testing
+
+This project uses pytest and pytest-asyncio along with Temporal's testing SDK.
+Bash
+
+    # Run all tests
+    pytest
+
+
+
+
+
