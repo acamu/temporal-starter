@@ -54,7 +54,7 @@ This layout follows Python best practices for Temporal projects, ensuring scalab
 ```text
 .
 ├── src/
-|   |── worker
+|   |── worker_simple
 │   │   ├── activities/
 │   │   │   ├── __init__.py
 │   │   │   └── activities.py              # AI-related activities
@@ -71,9 +71,9 @@ This layout follows Python best practices for Temporal projects, ensuring scalab
 │   │   ├── workflows/
 │   │   │   ├── __init__.py
 │   │   │   └── genai_workflow.py          # Workflow definitions & orchestration
-│   │   ├── main_worker.py                 # The Worker (The execution engine)
+│   │   ├── main_simple_worker.py          # The Worker (The execution engine)
 │   │   └── shared.py                      # Common constants and data models
-│   ├── main_workflow.py                   # Workflow requested from application side
+│   ├── main_simple_workflow.py            # Workflow requested from application side
 ├── tests/                                 # Unit and integration tests
 ├── .env.example                           # Environment variables template
 ├── pyproject.toml
