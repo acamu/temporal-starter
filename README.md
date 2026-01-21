@@ -172,7 +172,7 @@ Bash
 
     python src/main_simple_workflow.py
 
-### Deployment & Versioning (Patching)
+### Deployment & Versioning (Patching) => for example
 
 This project demonstrates Zero-Downtime Deployment using Temporal's patching system.
 How it works:
