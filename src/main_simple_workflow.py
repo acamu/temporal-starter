@@ -68,7 +68,7 @@ async def main():
         # task_timeout=timedelta(seconds=2),
     )
 
-    logger.success(f"Workflow, starting...(ID: {workflow_id})")
+    logger.success(f"Started workflow. Workflow ID: {handle.id}, RunID {handle.result_run_id}")
 
     # get Workflow ID
     workflow_handle = client.get_workflow_handle(workflow_id)

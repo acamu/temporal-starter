@@ -3,6 +3,7 @@ from datetime import timedelta
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.exceptions import ApplicationError
+from temporalio.workflow import patched
 
 with workflow.unsafe.imports_passed_through():
     from worker_simple.activities.activities import ToolActivities
@@ -33,15 +34,27 @@ class GenAIWorkflow:
         try:
 
             #name = api_request
-            get_data_result = await workflow.execute_activity(
-                ToolActivities.get_database_data,
-                args=[api_request],
-                # Activity Execution Timeout
-                start_to_close_timeout=timedelta(seconds=10),
-                # schedule_to_start_timeout=timedelta(seconds=10),
-                # schedule_to_close_timeout=timedelta(seconds=20),
-                retry_policy=retry_policy
-            )
+            get_data_result = ""
+            if patched('v3'):
+                get_data_result = await workflow.execute_activity(
+                    ToolActivities.get_database_data_v2,
+                    args=[api_request],
+                    # Activity Execution Timeout
+                    start_to_close_timeout=timedelta(seconds=10),
+                    # schedule_to_start_timeout=timedelta(seconds=10),
+                    # schedule_to_close_timeout=timedelta(seconds=20),
+                    retry_policy=retry_policy
+                )
+            else:
+                get_data_result = await workflow.execute_activity(
+                    ToolActivities.get_database_data,
+                    args=[api_request],
+                    # Activity Execution Timeout
+                    start_to_close_timeout=timedelta(seconds=10),
+                    # schedule_to_start_timeout=timedelta(seconds=10),
+                    # schedule_to_close_timeout=timedelta(seconds=20),
+                    retry_policy=retry_policy
+                )
 
             self.wkf_logger.info("==>"+get_data_result)
 
