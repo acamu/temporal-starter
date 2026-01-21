@@ -4,7 +4,7 @@ This project demonstrates how to build resilient, production-grade AI workflows 
 
 ## Key Features
 - **Durable Execution**: Workflows resume automatically after server or network failures.
-- **Resilient AI Calls**: Integrated retry policies for Gemini API to handle rate limits (429) and timeouts.
+- **Resilient AI Calls**: Integrated retry policies for LLM API to handle rate limits (429) and timeouts.
 - **Safe Versioning**: Demonstrates `workflow.patched` for zero-downtime updates.
 - **Clean Architecture**: Separation of concerns between Workflows (orchestration) and Activities (business logic).
 
@@ -82,94 +82,43 @@ This layout follows Python best practices for Temporal projects, ensuring scalab
 
 Workflows  
 
-With Front End (Not part now of this example)
-
+Worker Simple (Call fake DB and call fake LLM)
 ```mermaid
-sequenceDiagram
-    participant UI as Angular Frontend
-    participant API as FastAPI Gateway
-    participant T as Temporal Server
-    participant W as Workflow (Worker)
-    participant A as Activities (LLM/Email)
+graph TD
+    Start((Workflow Start)) --> Init[Init Logger]
+    Init --> VersionCheck{Is patched 'v3'?}
 
-    Note over UI, API: Phase d'Initialisation
-    UI->>API: POST /workflow/start (brouillon)
-    API->>T: Start Workflow (ProfessionalEmailWorkflow)
-    T-->>API: workflow_id
-    API-->>UI: workflow_id
+    %% Versioning Branch
+    VersionCheck -- Yes --> V2[Activity: get_database_data_v2]
+    VersionCheck -- No --> V1[Activity: get_database_data]
 
-    Note over UI, W: Boucle de Feedback (Polling)
-    loop Jusqu'à Complétion
-        UI->>API: GET /workflow/state/{id}
-        API->>T: Query: get_state + Describe
-        T-->>API: { status: RUNNING, is_thinking: true/false, proposal: "..." }
-        API-->>UI: Full State JSON
+    %% Activity Retry Logic
+    subgraph Retry_Logic [Temporal Retry Policy]
+        direction LR
+        R1[Backoff 2.0] --- R2[Max 5 Attempts]
     end
 
-    Note over W, A: Phase d'exécution IA
-    W->>A: execute_activity: call_external_api (LLM)
-    activate A
-    A-->>W: Résultat réécrit
-    deactivate A
+    V2 -.-> Retry_Logic
+    V1 -.-> Retry_Logic
 
-    Note over UI, W: Interaction Humaine
-    UI->>API: POST /workflow/signal/{id} (Valider ou Modifier)
-    API->>T: Signal: submit_email_content OU approve_llm_result
-    T->>W: Réveil du workflow (Update state)
+    %% Success Path
+    V2 --> LogData[Log Data Result]
+    V1 --> LogData[Log Data Result]
 
-    Note over W, A: Phase Finale
-    W->>A: execute_activity: send_email
-    A-->>W: Succès
-    W-->>T: Completed
-
-```
-  
-Worker and workflow example
-```mermaid
-sequenceDiagram
-    participant TS as Temporal Server (Persistence)
-    participant W as Workflow Definition
-    participant WR as Worker (Executor)
-    participant A as Activities (LLM / Email)
-
-    Note over TS, WR: Le Worker écoute la Task Queue
+    LogData --> LLM[Activity: call_external_api]
+    LLM -.-> Retry_Logic
     
-    TS->>WR: Workflow Task (Start)
-    WR->>W: Initialise l'état (_is_thinking=False)
-    
-    W->>TS: Wait Condition (Attente _content)
-    Note right of TS: Le Workflow est suspendu (0 CPU)
+    LLM --> LogFinal[Log Final Result]
+    LogFinal --> End((Workflow Success))
 
-    TS->>WR: Signal: submit_email_content
-    WR->>W: Mise à jour _content
-    
-    loop Tant que pas approuvé (_is_approved == False)
-        W->>W: Set _is_thinking = True
-        W->>TS: Schedule Activity: call_external_api
-        TS->>WR: Activity Task
-        WR->>A: Execute: call_external_api
-        A-->>WR: Résultat (Texte réécrit)
-        WR-->>TS: Activity Task Completed
-        
-        TS->>WR: Workflow Task (Resume)
-        WR->>W: Update _proposal & _is_thinking = False
-        
-        W->>TS: Wait Condition (Signal Approval ou New Content)
-        Note right of TS: Le Workflow "dort" en attendant l'humain
-        
-        TS->>WR: Signal: approve_llm_result(True)
-        WR->>W: Set _is_approved = True
-    end
+    %% Exception Handling
+    LLM -- "InvalidPromptError" --> ImmediateFail[Immediate Failure]
+    V2 -- "InvalidPromptError" --> ImmediateFail
+    V1 -- "InvalidPromptError" --> ImmediateFail
 
-    W->>TS: Schedule Activity: send_email
-    TS->>WR: Activity Task
-    WR->>A: Execute: send_email
-    A-->>WR: Success
-    WR-->>TS: Activity Task Completed
-    
-    W->>TS: Workflow Completed
-    Note over TS: Fin de l'historique
-
+    ImmediateFail --> WrapError[Raise ApplicationError]
+    Retry_Logic -- "Max Retries Reached" --> WrapError
+    WrapError --> FailEnd((Workflow Failed))
 ```
 
 ## Prerequisites & Setup
