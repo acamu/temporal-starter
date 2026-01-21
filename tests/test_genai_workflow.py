@@ -3,8 +3,8 @@ from temporalio import activity
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 
-from worker.activities.activities import ToolActivities
-from worker.workflows.genai_workflow import GenAIWorkflow
+from worker_simple.activities.activities import ToolActivities
+from worker_simple.workflows.genai_workflow import GenAIWorkflow
 
 
 ##
@@ -21,7 +21,7 @@ async def get_database_data_mocked(name: str) -> str:
 async def test_genai_workflow_full_run():
     # 1. Start a local time-skipping workflows environment
     async with await WorkflowEnvironment.start_time_skipping() as env:
-        # 2. Setup a worker dedicated to the test
+        # 2. Setup a worker_simple dedicated to the test
         async with Worker(
                 env.client,
                 task_queue="test-tq",
@@ -43,7 +43,7 @@ async def test_genai_workflow_full_run():
 async def test_genai_workflow_full_run_error():
     # 1. Start a local time-skipping workflows environment
     async with await WorkflowEnvironment.start_time_skipping() as env:
-        # 2. Setup a worker dedicated to the test
+        # 2. Setup a worker_simple dedicated to the test
         async with Worker(
                 env.client,
                 task_queue="test-tq",

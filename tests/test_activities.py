@@ -1,7 +1,7 @@
 import pytest
 from temporalio.testing import ActivityEnvironment
 
-from worker.activities.activities import ToolActivities
+from worker_simple.activities.activities import ToolActivities
 
 
 @pytest.mark.asyncio

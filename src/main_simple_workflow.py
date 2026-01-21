@@ -4,9 +4,9 @@ import ulid
 from temporalio.client import Client
 from temporalio.service import TLSConfig
 
-from worker.config.DefaultSettings import DefaultSettings
-from worker.logs.log_config import setup_logger
-from worker.logs.logger import get_logger
+from worker_simple.config.DefaultSettings import DefaultSettings
+from worker_simple.logs.log_config import setup_logger
+from worker_simple.logs.logger import get_logger
 
 
 def file_to_bytes(file_path: str):

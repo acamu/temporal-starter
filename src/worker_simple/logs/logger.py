@@ -88,7 +88,7 @@ def get_logger(context: Optional[str] = None):
                 # Sinon utiliser le nom de la fonction
                 context = frame.f_back.f_code.co_name
         else:
-            context = "worker"
+            context = "worker_simple"
 
     return logger.bind(
         workflow_id="N/A",

@@ -5,8 +5,8 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import ApplicationError
 
 with workflow.unsafe.imports_passed_through():
-    from worker.activities.activities import ToolActivities
-    from worker.logs.logger import get_workflow_logger
+    from worker_simple.activities.activities import ToolActivities
+    from worker_simple.logs.logger import get_workflow_logger
 
 
 # Define a resilient retry strategy for unstable AI APIs

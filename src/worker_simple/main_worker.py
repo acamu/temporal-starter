@@ -2,12 +2,12 @@ from temporalio.client import Client
 from temporalio.service import TLSConfig
 from temporalio.worker import Worker
 
-from worker.config.DefaultSettings import DefaultSettings
-from worker.activities.activities import ToolActivities
-from worker.logs.log_config import setup_logger
+from worker_simple.config.DefaultSettings import DefaultSettings
+from worker_simple.activities.activities import ToolActivities
+from worker_simple.logs.log_config import setup_logger
 
-from worker.logs.logger import get_logger
-from worker.workflows.genai_workflow import GenAIWorkflow
+from worker_simple.logs.logger import get_logger
+from worker_simple.workflows.genai_workflow import GenAIWorkflow
 
 
 def file_to_bytes(file_path: str):
@@ -18,7 +18,7 @@ async def main():
     setup_logger()
 
     logger = get_logger()
-    logger.info("Start Temporal worker")
+    logger.info("Start Temporal worker_simple")
 
     rpc_metadata = {
         "authorization": f"Bearer {DefaultSettings().temporal_server_bearer}",
@@ -51,7 +51,7 @@ async def main():
     # create Tool inctance
     tool_activities = ToolActivities()
 
-    # create worker and register the workflows and activity
+    # create worker_simple and register the workflows and activity
     worker = Worker(
         client,
         task_queue="myapp-tasks-queue",
@@ -62,7 +62,7 @@ async def main():
     logger.success("Worker configured, starting...")
 
 
-    # Start the worker
+    # Start the worker_simple
     try:
         await worker.run()
     except Exception as e:
