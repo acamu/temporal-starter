@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from time import sleep
 
 from temporalio import activity
+from temporalio.workflow import patched
 
 from worker_simple.api.call_llm import call_llm_api
 from worker_simple.logs.logger import get_activity_logger
@@ -38,9 +39,17 @@ class ToolActivities:
         self.act_logger.info(f"Start activity for {name}")
 
         try:
-            sleep(3)
-            result = f"Hello {name}!"
-            self.act_logger.debug(f"database result: {result}")
+            result = ""
+            if patched('v2'):
+                # This is the newest version of the code.
+                sleep(3)
+                result = f"Database result {name}!"
+                self.act_logger.debug(f"database result: {result}")
+            else:
+                sleep(3)
+                result = f"Hello {name}!"
+                self.act_logger.debug(f"database result: {result}")
+
             return result
         except Exception as e:
             self.act_logger.exception(f"Activity error: {e}")
