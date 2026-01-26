@@ -56,7 +56,7 @@ async def main():
         client,
         task_queue="myapp-tasks-queue",
         workflows=[GenAIWorkflow],
-        activities=[tool_activities.call_external_api, tool_activities.get_database_data, tool_activities.get_database_data_v2]
+        activities=[tool_activities.call_llm_activity, tool_activities.get_database_data, tool_activities.get_database_data_v2]
     )
 
     logger.success("Worker configured, starting...")

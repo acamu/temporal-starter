@@ -59,7 +59,7 @@ class GenAIWorkflow:
             self.wkf_logger.info("==>"+get_data_result)
 
             result = await workflow.execute_activity(
-                ToolActivities.call_external_api,
+                ToolActivities.call_llm_activity,
                 args=[get_data_result],
                 # Activity Execution Timeout
                 start_to_close_timeout=timedelta(seconds=10),

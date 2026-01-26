@@ -26,7 +26,7 @@ async def test_genai_workflow_full_run():
                 env.client,
                 task_queue="test-tq",
                 workflows=[GenAIWorkflow],
-                activities=[ToolActivities().call_external_api, ToolActivities().get_database_data,  ToolActivities().get_database_data_v2],
+                activities=[ToolActivities().call_llm_activity, ToolActivities().get_database_data, ToolActivities().get_database_data_v2],
         ):
             # 3. Execute the workflows
             result = await env.client.execute_workflow(
@@ -48,7 +48,7 @@ async def test_genai_workflow_full_run_error():
                 env.client,
                 task_queue="test-tq",
                 workflows=[GenAIWorkflow],
-                activities=[ToolActivities().call_external_api, get_database_data_mocked,  ToolActivities().get_database_data],
+                activities=[ToolActivities().call_llm_activity, get_database_data_mocked, ToolActivities().get_database_data],
         ):
             # 3. Execute the workflows
             result = await env.client.execute_workflow(

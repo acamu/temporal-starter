@@ -17,7 +17,7 @@ class ToolActivities:
 
 
     @activity.defn
-    async def call_external_api(self, prompt):
+    async def call_llm_activity(self, prompt):
         self.act_logger.info(f"Start activity for {prompt}")
 
         try:

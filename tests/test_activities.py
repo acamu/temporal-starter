@@ -12,7 +12,7 @@ async def test_call_gemini_activity_success():
 
     # We execute the activity in a test environment
     tools = ToolActivities()
-    result = await env.run(tools.call_external_api, prompt)
+    result = await env.run(tools.call_llm_activity, prompt)
 
     assert isinstance(result, str)
     assert len(result) > 0
