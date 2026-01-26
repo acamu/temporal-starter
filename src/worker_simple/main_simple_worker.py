@@ -20,6 +20,7 @@ async def main():
     logger = get_logger()
     logger.info("Start Temporal worker_simple")
 
+    # if auth front you can add header (e.g)
     rpc_metadata = {
         "authorization": f"Bearer {DefaultSettings().temporal_server_bearer}",
         # "api-key": ""
@@ -27,6 +28,7 @@ async def main():
 
     try:
 
+        # If SSL you can specify you cert (e.g)
         if DefaultSettings().temporal_server_tls:
             tls_config = TLSConfig(
                 server_root_ca_cert=file_to_bytes(""),
@@ -48,7 +50,7 @@ async def main():
         print(f"x Error: {ex}")
         raise
 
-    # create Tool inctance
+    # create Tool instance
     tool_activities = ToolActivities()
 
     # create worker_simple and register the workflows and activity
@@ -56,7 +58,10 @@ async def main():
         client,
         task_queue="myapp-tasks-queue",
         workflows=[GenAIWorkflow],
-        activities=[tool_activities.call_llm_activity, tool_activities.get_database_data, tool_activities.get_database_data_v2]
+        activities=[tool_activities.call_llm_activity,
+                    tool_activities.get_database_data,
+                    tool_activities.get_database_data_v2
+                    ]
     )
 
     logger.success("Worker configured, starting...")

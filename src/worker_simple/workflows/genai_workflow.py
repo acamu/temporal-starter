@@ -25,7 +25,7 @@ class GenAIWorkflow:
         self.wkf_logger = get_workflow_logger()
         self.wkf_logger.info(f"Init Workflows")
 
-    # Exemple of workflow
+    # Workflow example
     # a- Get database data
     # b- Call LLM API
     @workflow.run
