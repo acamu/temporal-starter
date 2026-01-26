@@ -32,8 +32,6 @@ class GenAIWorkflow:
     async def run(self, api_request):
 
         try:
-
-            #name = api_request
             get_data_result = ""
             if patched('v3'):
                 get_data_result = await workflow.execute_activity(
@@ -56,7 +54,7 @@ class GenAIWorkflow:
                     retry_policy=retry_policy
                 )
 
-            self.wkf_logger.info("==>"+get_data_result)
+            self.wkf_logger.info("Intermediate result: "+get_data_result)
 
             result = await workflow.execute_activity(
                 ToolActivities.call_llm_activity,
@@ -68,7 +66,7 @@ class GenAIWorkflow:
                 retry_policy=retry_policy
             )
 
-            self.wkf_logger.info("===>"+result)
+            self.wkf_logger.info("Final result: "+result)
 
             return result
         except ApplicationError as e:
